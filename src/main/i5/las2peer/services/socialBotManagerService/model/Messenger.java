@@ -127,7 +127,6 @@ public class Messenger {
 				// System.out.println(this.knownIntents.toString());
 				if (message.getText().startsWith("!")) {
 					// Split at first occurring whitespace
-					System.out.println("This was a command");
 
 					String splitMessage[] = message.getText().split("\\s+", 2);
 
@@ -153,17 +152,17 @@ public class Messenger {
 					}
 
 					intent = new Intent(intentKeyword, entityKeyword, entityValue);
-				} else {
-					// what if you want to start an assessment with a command?
-					System.out.println("Intent Extraction now with  : " + this.currentNluModel.get(message.getChannel()));
-					intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
-
+				} else {		
+					if(message.getText().contains("test")) {
+						intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntentStress(message.getText());
+					} else intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
+					
 				}
 				System.out.println(intent.getKeyword());
 				String triggeredFunctionId = null;
 				IncomingMessage state = this.stateMap.get(message.getChannel());
 				if (state != null) {
-					System.out.println(state.getIntentKeyword());
+			//		System.out.println(state.getIntentKeyword());
 
 				}
 				// No conversation state present, starting from scratch
@@ -172,21 +171,21 @@ public class Messenger {
 					if (intent.getConfidence() >= 0.40f) {
 						if (state == null) {
 							state = this.knownIntents.get(intent.getKeyword());
-							System.out.println(
-									intent.getKeyword() + " detected with " + intent.getConfidence() + " confidence.");
+				//			System.out.println(
+				//					intent.getKeyword() + " detected with " + intent.getConfidence() + " confidence.");
 							stateMap.put(message.getChannel(), state);
 						} else {
 							// any is a static forward
 							// TODO include entities of intents
 							if (state.getFollowingMessages() == null || state.getFollowingMessages().isEmpty()) {
-								System.out.println("no follow up messages");
+					//			System.out.println("no follow up messages");
 								state = this.knownIntents.get(intent.getKeyword());
 								this.currentNluModel.put(message.getChannel(), "0");
 								System.out.println(intent.getKeyword() + " detected with " + intent.getConfidence()
 										+ " confidence.");
 								stateMap.put(message.getChannel(), state);
 							} else if (state.getFollowingMessages().get(intent.getKeyword()) != null) {
-								System.out.println("try follow up message");
+						//		System.out.println("try follow up message");
 								// check ratings
 								String keyword = intent.getKeyword();
 								String txt = message.getText();
@@ -199,8 +198,8 @@ public class Messenger {
 								state = state.getFollowingMessages().get(intent.getKeyword());
 								stateMap.put(message.getChannel(), state);
 							} else {
-								System.out.println(intent.getKeyword() + " not found in state map. Confidence: "
-										+ intent.getConfidence() + " confidence.");
+							//	System.out.println(intent.getKeyword() + " not found in state map. Confidence: "
+							//			+ intent.getConfidence() + " confidence.");
 								// try any
 								if (state.getFollowingMessages().get("any") != null) {
 									String tmp = message.getText().replaceAll("[^0-9]", "");
@@ -251,7 +250,7 @@ public class Messenger {
 								// ul
 								else if (intent.getEntities().size() > 0 && !this.triggeredFunction.containsKey(message.getChannel())) {
 									Collection<Entity> entities = intent.getEntities();
-									System.out.println("try to use entity...");
+								//	System.out.println("try to use entity...");
 									for (Entity e : entities) {
 										System.out.println(e.getEntityName() + " (" + e.getValue() + ")");
 										state = this.knownIntents.get(e.getEntityName());
@@ -267,7 +266,7 @@ public class Messenger {
 						System.out.println(
 								intent.getKeyword() + " not detected with " + intent.getConfidence() + " confidence.");
 						state = this.knownIntents.get("default");
-						System.out.println(state.getIntentKeyword() + " set");
+					//	System.out.println(state.getIntentKeyword() + " set");
 					}
 				} else if (intent.getConfidence() < 0.40f) {
 					intent = new Intent("default", "", "");
@@ -295,7 +294,7 @@ public class Messenger {
 							response = state.getResponse(this.random);
 						}
 						if (state.getNluID() != "") {
-							System.out.println("New NluId is : " + state.getNluID());
+				//			System.out.println("New NluId is : " + state.getNluID());
 							this.currentNluModel.put(message.getChannel(), state.getNluID());
 						}
 						if (response != null) {

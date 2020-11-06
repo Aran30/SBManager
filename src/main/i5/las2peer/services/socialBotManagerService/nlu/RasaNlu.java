@@ -46,7 +46,6 @@ public class RasaNlu {
 		try {
 			MiniClient client = new MiniClient();
 			client.setConnectorEndpoint(this.url);
-			System.out.println("Rasa url:" + this.url);
 			JSONObject inputJSON = new JSONObject(
 					Collections.singletonMap("text", StringEscapeUtils.escapeJson(input)));
 			HashMap<String, String> headers = new HashMap<String, String>();
@@ -60,4 +59,22 @@ public class RasaNlu {
 			return new JSONObject();
 		}
 	}
+	
+	public Intent getIntentStress(String input) {
+		JSONObject intentJSON;
+		long startTime = System.nanoTime();
+		int num = Integer.valueOf(input.split("text")[0]);
+		for(int i = 0; i < num; i++) {
+		try {
+			intentJSON = getIntentJSON(input);
+		} catch (IOException | ParseException e) {
+			System.err.println("Error retrieving intent from Rasa NLU:");
+			e.printStackTrace();
+		}}
+		long endTime = System.nanoTime();
+		
+		System.out.println("End of test, rasa with kube is ok for " + num + " and took " + (endTime-startTime)/1000000000 + "seconds :D");
+		return null;
+	}
+	
 }
