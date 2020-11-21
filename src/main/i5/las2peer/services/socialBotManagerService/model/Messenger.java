@@ -153,18 +153,12 @@ public class Messenger {
 
 					intent = new Intent(intentKeyword, entityKeyword, entityValue);
 				} else {		
-					if(message.getText().contains("test")) {
-						intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntentStress(message.getText());
-					} else intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
-					
+					System.out.println(message.getFileName()+ " + " + message.getFileBody());
+				 intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
 				}
 				System.out.println(intent.getKeyword());
 				String triggeredFunctionId = null;
 				IncomingMessage state = this.stateMap.get(message.getChannel());
-				if (state != null) {
-			//		System.out.println(state.getIntentKeyword());
-
-				}
 				// No conversation state present, starting from scratch
 				// TODO: Tweak this
 				if (!this.triggeredFunction.containsKey(message.getChannel())) {
@@ -256,8 +250,13 @@ public class Messenger {
 										state = this.knownIntents.get(e.getEntityName());
 										stateMap.put(message.getChannel(), state);
 									}
-								}
-								else{
+									// In a conversation state, if no fitting intent was found and an empty leadsTo label is found
+								} else if(state.getFollowingMessages().get("") != null){
+									System.out.println("Empty leadstoo");
+									state = state.getFollowingMessages().get("");
+									stateMap.put(message.getChannel(), state);
+								} 
+								else {
 									state = this.knownIntents.get("default");
 								}
 							}
@@ -383,6 +382,10 @@ public class Messenger {
 									}
 									System.out.println(split);
 									this.chatMediator.sendMessageToChannel(message.getChannel(), split);
+									if (response.getTriggeredFunctionId() != null) {
+										this.triggeredFunction.put(message.getChannel(), response.getTriggeredFunctionId());
+										contextOn = true;
+									}
 								}
 							} else {
 								if (response.getTriggeredFunctionId() != "") {
