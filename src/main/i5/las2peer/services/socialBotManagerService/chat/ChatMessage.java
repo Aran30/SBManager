@@ -6,23 +6,11 @@ public class ChatMessage {
 	private int role;
 	private String email;
 	private String text;
-	private String fileName;
-	private String fileType;
-	private String body;
 
 	public ChatMessage(String channel, String user, String text) {
 		this.channel = channel;
 		this.user = user;
 		this.text = text;
-	}
-	
-	public ChatMessage(String channel, String user, String text, String fileName, String fileType, String body) {
-		this.channel = channel;
-		this.user = user;
-		this.text = text + fileName;
-		this.fileName = fileName;
-		this.fileType = fileType;
-		this.body = body;
 	}
 
 	public void setText(String text) {
@@ -55,17 +43,5 @@ public class ChatMessage {
 
 	public void setRole(int role) {
 		this.role = role;
-	}
-	
-	public String getFileName() {
-		return fileName;
-	}
-	
-	public String getFileType() {
-		return fileType;
-	}
-	
-	public String getFileBody() {
-		return body;
 	}
 }

@@ -1024,9 +1024,9 @@ public class SocialBotManagerService extends RESTService {
             // This part is "hardcoded" and will need improvements, but currently makes using the assessment function work
                     MiniClient client = new MiniClient();
                     client.setConnectorEndpoint(vle.getAddress());
-                    client.setLogin("alice", "pwalice");   
+                  //  client.setLogin("alice", "pwalice");   
                     System.out.println(botAgent.getLoginName() + "    pass " +  botPass);
-                  // client.setLogin(botAgent.getLoginName(), botPass);
+                    client.setLogin(botAgent.getLoginName(), botPass);
                     triggeredBody.put("botName", botAgent.getIdentifier());
                     System.out.println("botagent is " +  botAgent.getIdentifier());
                     HashMap<String, String> headers = new HashMap<String, String>();
@@ -1391,15 +1391,14 @@ public class SocialBotManagerService extends RESTService {
 					long d2 = r.getLastUpdate();
 
 					long diffInMillies = d1 - d2;
-					System.out.println(diffInMillies);
+
 					int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
 
 					boolean trigger = false;
 					long min = TimeUnit.MINUTES.convert(diffInMillies, TimeUnit.MILLISECONDS);
 					if (r.getInterval().equals("Minute")) {
-						System.out.println("Min is"  + min);
+
 						if (min >= Integer.parseInt(r.getTime())) {
-							System.out.println("Srtart tifeggge"  + min);
 							trigger = true;
 							r.setLastUpdate(d1);
 						}
@@ -1451,7 +1450,6 @@ public class SocialBotManagerService extends RESTService {
 							HashSet<Trigger> tList = r.getTrigger();
 							for (Trigger t : tList) {
 						//		for (Entry<String, Boolean> entry : activeBots.entrySet()) {
-									System.out.println("is active " + t);
 									// If bot is active
 								//	if (entry.getValue()) {
 										

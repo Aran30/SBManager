@@ -10,7 +10,6 @@ public class IncomingMessage {
 	String intentKeyword;
 	String entityKeyword;
     String NluID;
-    Boolean containsFile;
 
 	ArrayList<ChatResponse> responses;
 
@@ -34,13 +33,10 @@ public class IncomingMessage {
 	}
 
 
-	public IncomingMessage(String intent, String NluID, Boolean containsFile) {
-		if(intent != "") {
-			this.intentKeyword = replaceUmlaute(intent);
-		} else intent = "";
+	public IncomingMessage(String intent, String NluID) {
+		this.intentKeyword = replaceUmlaute(intent);
 		this.followupMessages = new HashMap<String, IncomingMessage>();
 		this.responses = new ArrayList<ChatResponse>();
-		this.containsFile = containsFile;
         if(NluID == ""){
             this.NluID = "";
         } else this.NluID = NluID;
@@ -98,8 +94,5 @@ public class IncomingMessage {
 		return this.triggeredFunctionId;
 	}
 
-	public Boolean expectsFile() {
-		return this.containsFile;
-	}
 
 }
