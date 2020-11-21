@@ -60,7 +60,10 @@ public class RocketChatMessageCollector extends ChatMessageCollector {
 					System.out.println("Email of user is "+ email );
 					cm.setEmail(email);
 					cm.setRole(role);
-					this.addMessage(cm);
+					for(int i = 0; i < 25; i++) {
+						this.addMessage(cm);
+					}
+					
 					System.out.println("Message added.");
 				} catch (Exception e) {
 					e.printStackTrace();
