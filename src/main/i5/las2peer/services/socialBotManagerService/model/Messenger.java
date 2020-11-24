@@ -182,8 +182,13 @@ public class Messenger {
 								} else {
 									state = this.knownIntents.get("default");
 								}
+								stateMap.put(message.getChannel(), state);
 							} else {
 								state = this.knownIntents.get(intent.getKeyword());
+								// Incoming Message which expects file should not be chosen when no file was sent
+								if(state.expectsFile()) {
+									state = this.knownIntents.get("default");
+								}
 								System.out.println(
 										intent.getKeyword() + " detected with " + intent.getConfidence() + " confidence.");
 								stateMap.put(message.getChannel(), state);
@@ -211,7 +216,7 @@ public class Messenger {
 								}
 								// check if a file was received during a conversation and search for a follow up incoming message which expects a file.
 								if(message.getFileBody() != null) {
-									if(state.getFollowingMessages().get(intent.getKeyword()).containsFile) {
+									if(state.getFollowingMessages().get(intent.getKeyword()).expectsFile()) {
 										state = state.getFollowingMessages().get(intent.getKeyword());
 										stateMap.put(message.getChannel(), state);
 									} else {
@@ -285,7 +290,7 @@ public class Messenger {
 								} else if(state.getFollowingMessages().get("") != null){
 									System.out.println("Empty leadsTo");
 									if(message.getFileBody() != null) {
-										if(state.getFollowingMessages().get("").containsFile) {
+										if(state.getFollowingMessages().get("").expectsFile()) {
 											state = state.getFollowingMessages().get("");
 										} else {
 											state = this.knownIntents.get("default");
