@@ -43,7 +43,8 @@ public class Intent {
 		entities.forEach(
 			o ->
 			{
-				Entity entity = new Entity((JSONObject)o);			
+				Entity entity = new Entity((JSONObject)o);		
+			//	System.out.println("Entity "+ entity.getEntityName() + "extracted with value " + entity.getValue());
                 entitiesMap.put(entity.getEntityName(), entity);
 			}
 		);

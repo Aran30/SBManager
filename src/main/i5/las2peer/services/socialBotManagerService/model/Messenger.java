@@ -138,7 +138,7 @@ public class Messenger {
 						if (this.currentNluModel.get(message.getChannel()) == "0") {
 							continue;
 						} else {
-							incMsg = new IncomingMessage(intentKeyword, "");
+							incMsg = new IncomingMessage(intentKeyword, "", false);
 							incMsg.setEntityKeyword("newEntity");
 						}
 					}
@@ -162,24 +162,38 @@ public class Messenger {
 				// No conversation state present, starting from scratch
 				// TODO: Tweak this
 				if (!this.triggeredFunction.containsKey(message.getChannel())) {
-					if (intent.getConfidence() >= 0.40f) {
+					// add file case to default if part
+					if (intent.getConfidence() >= 0.40 || message.getFileName() != null) {
 						if (state == null) {
-							state = this.knownIntents.get(intent.getKeyword());
-				//			System.out.println(
-				//					intent.getKeyword() + " detected with " + intent.getConfidence() + " confidence.");
-							stateMap.put(message.getChannel(), state);
+							if(message.getFileName() != null){
+								// check whether incoming message with intent expects file or without intent, such that you can send a file regardless the intent
+								if(this.knownIntents.get(intent.getKeyword()) != null && this.knownIntents.get(intent.getKeyword()).expectsFile()) {
+									state = this.knownIntents.get(intent.getKeyword());
+									// get("0") refers to an empty intent that is accessible from the start state
+								} else if(this.knownIntents.get("0") != null && this.knownIntents.get("0").expectsFile()) {
+									state = this.knownIntents.get("0");
+									System.out.println(state.getResponse(random));
+								} else {
+									state = this.knownIntents.get("default");
+								}
+							} else {
+								state = this.knownIntents.get(intent.getKeyword());
+								System.out.println(
+										intent.getKeyword() + " detected with " + intent.getConfidence() + " confidence.");
+								stateMap.put(message.getChannel(), state);
+								}
 						} else {
 							// any is a static forward
 							// TODO include entities of intents
 							if (state.getFollowingMessages() == null || state.getFollowingMessages().isEmpty()) {
-					//			System.out.println("no follow up messages");
+								System.out.println("no follow up messages");
 								state = this.knownIntents.get(intent.getKeyword());
 								this.currentNluModel.put(message.getChannel(), "0");
 								System.out.println(intent.getKeyword() + " detected with " + intent.getConfidence()
 										+ " confidence.");
 								stateMap.put(message.getChannel(), state);
 							} else if (state.getFollowingMessages().get(intent.getKeyword()) != null) {
-						//		System.out.println("try follow up message");
+								System.out.println("try follow up message");
 								// check ratings
 								String keyword = intent.getKeyword();
 								String txt = message.getText();
@@ -189,11 +203,22 @@ public class Messenger {
 								} else if (keyword.equals("lowrating") && (txt.equals("4") || txt.equals("5"))) {
 									keyword = "highrating";
 								}
-								state = state.getFollowingMessages().get(intent.getKeyword());
-								stateMap.put(message.getChannel(), state);
+								// check if a file was received during a conversation and search for a follow up incoming message which expects a file.
+								if(message.getFileBody() != null) {
+									if(state.getFollowingMessages().get(intent.getKeyword()).containsFile) {
+										state = state.getFollowingMessages().get(intent.getKeyword());
+										stateMap.put(message.getChannel(), state);
+									} else {
+										state = this.knownIntents.get("default");
+									}
+										
+								} else {
+									state = state.getFollowingMessages().get(intent.getKeyword());
+									stateMap.put(message.getChannel(), state);
+								}
 							} else {
-							//	System.out.println(intent.getKeyword() + " not found in state map. Confidence: "
-							//			+ intent.getConfidence() + " confidence.");
+								System.out.println(intent.getKeyword() + " not found in state map. Confidence: "
+										+ intent.getConfidence() + " confidence.");
 								// try any
 								if (state.getFollowingMessages().get("any") != null) {
 									String tmp = message.getText().replaceAll("[^0-9]", "");
@@ -252,34 +277,57 @@ public class Messenger {
 									}
 									// In a conversation state, if no fitting intent was found and an empty leadsTo label is found
 								} else if(state.getFollowingMessages().get("") != null){
-									System.out.println("Empty leadstoo");
-									state = state.getFollowingMessages().get("");
-									stateMap.put(message.getChannel(), state);
+									System.out.println("Empty leadsTo");
+									if(message.getFileBody() != null) {
+										if(state.getFollowingMessages().get("").containsFile) {
+											state = state.getFollowingMessages().get("");
+										} else {
+											state = this.knownIntents.get("default");
+										}
+										
+									} else {
+										state = state.getFollowingMessages().get("");
+										stateMap.put(message.getChannel(), state);
+									}
+									
 								} 
 								else {
 									state = this.knownIntents.get("default");
 								}
 							}
 						}
-					} else {
+					} else{
 						System.out.println(
 								intent.getKeyword() + " not detected with " + intent.getConfidence() + " confidence.");
 						state = this.knownIntents.get("default");
 					//	System.out.println(state.getIntentKeyword() + " set");
 					}
+					// If a user sends a file, without wanting to use intent extraction on the name, then intent extraction will still be done, but the result ignored in this case
+				} else if(message.getFileName() != null) {
+					if(this.knownIntents.get("0").expectsFile()) {
+						state = this.knownIntents.get("0");
+						System.out.println(state.getResponse(random));
+					} else {
+						// if no Incoming Message is fitting, return default message
+						intent = new Intent("default", "", "");
+					}
+					// Default message if the message does not contain a file or the Intent was too low  
 				} else if (intent.getConfidence() < 0.40f) {
 					intent = new Intent("default", "", "");
 				}
 
 				
+				System.out.println("Here we are 295");
 
 				Boolean contextOn = false;
 				// No matching intent found, perform default action
 				if (this.triggeredFunction.containsKey(message.getChannel())) {
+					System.out.println("Here we are 300");
 					triggeredFunctionId = this.triggeredFunction.get(message.getChannel());
 					contextOn = true;
 				} else {
 					if (state != null) {
+						System.out.println("Here we are 305");
 						ChatResponse response = null;
 						if (intent.getEntitieValues().size() == 1) {
 							for (ChatResponse res : state.getResponseArray()) {
@@ -290,6 +338,7 @@ public class Messenger {
 							}
 						}
 						if (response == null) {
+							System.out.println("Here we are 316");
 							response = state.getResponse(this.random);
 						}
 						if (state.getNluID() != "") {
@@ -297,6 +346,7 @@ public class Messenger {
 							this.currentNluModel.put(message.getChannel(), state.getNluID());
 						}
 						if (response != null) {
+							System.out.println("Here we are 324");
 							if (response.getResponse() != "") {
 								if (intent.getEntity("schreibaufgabe") != null
 										|| intent.getKeyword().equals("beschreibung")) {
@@ -396,6 +446,7 @@ public class Messenger {
 								}
 							}
 						}
+						System.out.println("Smoething is wrong");
 						if (this.triggeredFunction.containsKey(message.getChannel())) {
 							triggeredFunctionId = this.triggeredFunction.get(message.getChannel());
 						} else

@@ -40,6 +40,12 @@ public abstract class ChatMediator {
 	public void sendFileMessageToChannel(String channel, File f, String text) {
 		sendFileMessageToChannel(channel, f, text, OptionalLong.empty());
 	}
+	
+	public abstract void sendFileMessageToChannel(String channel, String fileBody, String fileName, String fileType, OptionalLong id);
+
+	public void sendFileMessageToChannel(String channel, String fileBody, String fileName, String fileType) {
+		sendFileMessageToChannel(channel, fileBody, fileName, fileType, OptionalLong.empty());
+	}
 
 	/**
 	 * Gets messages the mediator received since the last time the method was called.
