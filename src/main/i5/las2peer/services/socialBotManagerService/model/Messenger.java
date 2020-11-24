@@ -154,7 +154,13 @@ public class Messenger {
 					intent = new Intent(intentKeyword, entityKeyword, entityValue);
 				} else {		
 					System.out.println(message.getFileName()+ " + " + message.getFileBody());
-				 intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
+					if(bot.getRasaServer(currentNluModel.get(message.getChannel())) != null) {
+						intent = bot.getRasaServer(currentNluModel.get(message.getChannel())).getIntent(message.getText());
+					} else {
+						// if the given id is not fit to any server, pick the first one. (In case someone specifies only one server and does not give an ID)
+						intent = bot.getFirstRasaServer().getIntent(message.getText());
+					}
+				 
 				}
 				System.out.println(intent.getKeyword());
 				String triggeredFunctionId = null;
@@ -316,7 +322,6 @@ public class Messenger {
 					intent = new Intent("default", "", "");
 				}
 
-				
 				System.out.println("Here we are 295");
 
 				Boolean contextOn = false;
