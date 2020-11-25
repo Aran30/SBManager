@@ -35,12 +35,13 @@ public abstract class ChatMediator {
 		sendMessageToChannel(channel, text, OptionalLong.empty());
 	}
 
+	// Used to send files from a file parameter
 	public abstract void sendFileMessageToChannel(String channel, File f, String text, OptionalLong id);
 
 	public void sendFileMessageToChannel(String channel, File f, String text) {
 		sendFileMessageToChannel(channel, f, text, OptionalLong.empty());
 	}
-	
+	// Used to send files and takes care of converting base64 to file
 	public abstract void sendFileMessageToChannel(String channel, String fileBody, String fileName, String fileType, OptionalLong id);
 
 	public void sendFileMessageToChannel(String channel, String fileBody, String fileName, String fileType) {
