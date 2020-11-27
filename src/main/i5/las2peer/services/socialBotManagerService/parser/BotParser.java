@@ -561,7 +561,7 @@ public class BotParser {
 				intentKeyword = subVal.getValue();
 			} else if (name.contentEquals("NLU ID")){
                 NluID = subVal.getValue();
-            } else if (name.contentEquals("ContainsFile")){
+            } else if (name.contentEquals("IsFile")){
                 containsFile = Boolean.valueOf(subVal.getValue());
             }
 		}
